@@ -63,16 +63,16 @@ def parseXML(path, date, log):
             if error == 'N':
 
                 descripcion = get_element(elem, 'descripcion', 'N/A').encode("iso-8859-1")
-                intensidad = get_element(elem, 'intensidad', -1)
-                ocupacion = get_element(elem, 'ocupacion', -1)
-                carga = get_element(elem, 'carga', -1)
-                nivelServicio = get_element(elem, 'nivelServicio', -1)
-                intensidadSat = get_element(elem, 'intensidadSat', -1)
-                subarea = get_element(elem, 'subarea', -1)
-                if intensidadSat == -1 and subarea == -1:
-                    velocidad = get_element(elem, 'velocidad', -1)
+                intensidad = get_element(elem, 'intensidad', "-1")
+                ocupacion = get_element(elem, 'ocupacion', "-1")
+                carga = get_element(elem, 'carga', "-1")
+                nivelServicio = get_element(elem, 'nivelServicio', "-1")
+                intensidadSat = get_element(elem, 'intensidadSat', "-1")
+                subarea = get_element(elem, 'subarea', "-1")
+                if intensidadSat == "-1" and subarea == "-1":
+                    velocidad = get_element(elem, 'velocidad', "-1")
                 else:
-                    velocidad = -1
+                    velocidad = "-1"
 
                 stm_check_codigo = ("SELECT codigo FROM accesos WHERE codigo = '" + codigo + "';")
                 c.execute(stm_check_codigo)
