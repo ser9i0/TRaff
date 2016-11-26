@@ -45,7 +45,8 @@ def parseXML(path, date, log):
         """Parse XML."""
         tree = ET.parse(path)
         t_iter = tree.iter(tag='pm')
-        log.write("..... XML parsed.\r\n")
+        total_obs = len(tree.findall('pm'))
+        log.write("..... XML parsed: " + str(total_obs) + " observations found.\r\n")
 
         """Every element contains the information for one unique access."""
         for elem in t_iter:
@@ -92,12 +93,12 @@ def parseXML(path, date, log):
                 if velocidad == '-1':
                     sql_stm = (
                         "INSERT INTO observaciones (codigo,fecha,intensidad,ocupacion,carga,nivel_servicio) VALUES ('"
-                        + codigo + "','" + date + "'," + intensidad + "," + ocupacion + "," + carga + "," + nivelServicio
-                        + ");")
+                        + codigo + "','" + date + "'," + intensidad + "," + ocupacion + "," + carga + "," +
+                        nivelServicio + ");")
                 else:
                     sql_stm = ("INSERT INTO observaciones VALUES ('"
-                               + codigo + "','" + date + "'," + intensidad + "," + ocupacion + "," + carga + "," + nivelServicio
-                               + "," + velocidad + ");")
+                               + codigo + "','" + date + "'," + intensidad + "," + ocupacion + "," + carga + "," +
+                               nivelServicio + "," + velocidad + ");")
                 #print(sql_stm)
                 c.execute(sql_stm)
                 inserted_obs += 1
@@ -108,24 +109,24 @@ def parseXML(path, date, log):
         conn_db.commit()
 
     except ET.ParseError as parse_error:
-        print("ERROR: Error parsing XML file")
-        log.write("ERROR: Error parsing XML file\r\n")
+        print("... /!\ ERROR: Error parsing XML file")
+        log.write("... /!\ ERROR: Error parsing XML file\r\n")
 
     except Exception as e:
         print(
-            "ERROR: Codigo: " + codigo + ", Intensidad: " + intensidad + ", Ocupacion: " + ocupacion + ", Carga: " + carga + ", nivelServicio: " + nivelServicio)
+            "... /!\ ERROR: Codigo: " + codigo + ", Intensidad: " + intensidad + ", Ocupacion: " + ocupacion +
+            ", Carga: " + carga + ", nivelServicio: " + nivelServicio)
         log.write(
-            "ERROR: Codigo: " + codigo + ", Intensidad: " + intensidad + ", Ocupacion: " + ocupacion + ", Carga: " + carga + ", nivelServicio: " + nivelServicio + "\r\n")
+            "... /!\ ERROR: Codigo: " + codigo + ", Intensidad: " + intensidad + ", Ocupacion: " + ocupacion +
+            ", Carga: " + carga + ", nivelServicio: " + nivelServicio + "\r\n")
         #print sql_stm
         #log.write(sql_stm + "\r\n")
-        #raise e
         traceback.print_exc()
         log.write(traceback.print_exc() + "\r\n")
 
     finally:
-        #TODO - Incluir numero observaciones anadidas / numero observaciones totales
-        print "Total observations inserted: ", inserted_obs
-        log.write("... Total observations inserted: " + str(inserted_obs) + "\r\n")
+        print ("Total observations inserted: " + str(inserted_obs) + "/" + str(total_obs))
+        log.write("... Total observations inserted: " + str(inserted_obs) + "/" + str(total_obs) + "\r\n")
         conn_db.close()
 
 
