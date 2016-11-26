@@ -35,6 +35,7 @@ def parseXML(path, date, log):
     """
     cwd = os.path.abspath(os.path.dirname(sys.argv[0])) + '/'
     inserted_obs = 0
+    error_obs = 0
 
     try:
         """Connect DB"""
@@ -62,7 +63,6 @@ def parseXML(path, date, log):
             error = get_element(elem, 'error', 'S')
 
             if error == 'N':
-
                 descripcion = get_element(elem, 'descripcion', 'N/A').encode("iso-8859-1")
                 intensidad = get_element(elem, 'intensidad', '-1')
                 ocupacion = get_element(elem, 'ocupacion', '-1')
@@ -103,7 +103,8 @@ def parseXML(path, date, log):
                 c.execute(sql_stm)
                 inserted_obs += 1
             else:
-                print("Error in " + codigo + " data.")
+                error_obs += 1
+                #print("Error in " + codigo + " data.")
                 #log.write("..... Error in " + codigo + " data.\r\n")
 
         conn_db.commit()
@@ -125,8 +126,10 @@ def parseXML(path, date, log):
         log.write(traceback.print_exc() + "\r\n")
 
     finally:
-        print ("Total observations inserted: " + str(inserted_obs) + "/" + str(total_obs))
-        log.write("... Total observations inserted: " + str(inserted_obs) + "/" + str(total_obs) + "\r\n")
+        print ("Total observations inserted: " + str(inserted_obs) + "/" + str(total_obs) +
+               " (" + str(error_obs) + " non valid observations)")
+        log.write("... Total observations inserted: " + str(inserted_obs) + "/" + str(total_obs) +
+               " (" + str(error_obs) + " non valid observations)" + "\r\n")
         conn_db.close()
 
 
