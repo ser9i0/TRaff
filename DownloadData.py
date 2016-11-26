@@ -63,21 +63,21 @@ def parseXML(path, date, log):
             if error == 'N':
 
                 descripcion = get_element(elem, 'descripcion', 'N/A').encode("iso-8859-1")
-                intensidad = get_element(elem, 'intensidad', "-1")
-                ocupacion = get_element(elem, 'ocupacion', "-1")
-                carga = get_element(elem, 'carga', "-1")
-                nivelServicio = get_element(elem, 'nivelServicio', "-1")
-                intensidadSat = get_element(elem, 'intensidadSat', "-1")
-                subarea = get_element(elem, 'subarea', "-1")
-                if intensidadSat == "-1" and subarea == "-1":
-                    velocidad = get_element(elem, 'velocidad', "-1")
+                intensidad = get_element(elem, 'intensidad', '-1')
+                ocupacion = get_element(elem, 'ocupacion', '-1')
+                carga = get_element(elem, 'carga', '-1')
+                nivelServicio = get_element(elem, 'nivelServicio', '-1')
+                intensidadSat = get_element(elem, 'intensidadSat', '-1')
+                subarea = get_element(elem, 'subarea', '-1')
+                if intensidadSat == '-1' and subarea == '-1':
+                    velocidad = get_element(elem, 'velocidad', '-1')
                 else:
-                    velocidad = "-1"
+                    velocidad = '-1'
 
                 stm_check_codigo = ("SELECT codigo FROM accesos WHERE codigo = '" + codigo + "';")
                 c.execute(stm_check_codigo)
                 if c.fetchone() is None:
-                    if intensidadSat == -1:
+                    if intensidadSat == '-1':
                         stm_insert_access = (
                             "INSERT INTO accesos(codigo,tipo,descripcion,utm_x,utm_y,longitud,latitud) VALUES ('"
                             + codigo + "','INTERURBANO','" + codigo + "',0,0,0,0);")
@@ -89,7 +89,7 @@ def parseXML(path, date, log):
                     log.write("..... New access added with code " + codigo + ".\r\n")
                     c.execute(stm_insert_access)
 
-                if velocidad == -1:
+                if velocidad == '-1':
                     sql_stm = (
                         "INSERT INTO observaciones (codigo,fecha,intensidad,ocupacion,carga,nivel_servicio) VALUES ('"
                         + codigo + "','" + date + "'," + intensidad + "," + ocupacion + "," + carga + "," + nivelServicio
