@@ -127,10 +127,8 @@ def parseXML(path, date, log):
         log.write(traceback.print_exc() + "\r\n")
 
     finally:
-        print ("Total observations inserted: " + str(inserted_obs) + "/" + str(total_obs) +
-               " (" + str(error_obs) + " non valid observations)")
-        log.write("... Total observations inserted: " + str(inserted_obs) + "/" + str(total_obs) +
-               " (" + str(error_obs) + " non valid observations)" + "\r\n")
+        print ("Total observations inserted: {0}/{1} ({2} non valid observations)".format(inserted_obs,total_obs,error_obs))
+        log.write("Total observations inserted: {0}/{1} ({2} non valid observations)\r\n".format(inserted_obs,total_obs,error_obs))
         conn_db.close()
 
 
@@ -153,10 +151,10 @@ if __name__ == '__main__':
             """Open log file."""
             log_path = os.path.join(cwd, 'data', 'download.log')
             log = open(log_path, 'a')
-            print("Downloaded file " + local_file_name + ".xml")
-            log.write("Downloaded file " + local_file_name + ".xml\r\n")
+            print("Downloaded file {0}.xml".format(local_file_name))
+            log.write("Downloaded file {0}.xml\r\n".format(local_file_name))
             local_file.close()
-            print("... reading file " + local_file_path + " into database...")
+            print("... reading file into database...")
             log.write("... reading file into database...\r\n")
             """Parse new XML file into database."""
             parseXML(local_file_path, rf_datetime.strftime("%Y-%m-%d %H:%M:%S"), log)
