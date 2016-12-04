@@ -1,11 +1,10 @@
-import urllib2
 import datetime
-import os.path
-import shutil
-import traceback
 import os
-import sys
+import shutil
 import sqlite3
+import sys
+import traceback
+import urllib2
 
 try:
     import xml.etree.cElementTree as ET
@@ -26,20 +25,22 @@ def get_element(element, tag, ret_value):
 
 
 def parseXML(path, date, log):
-    """Parse XML file into traff.db database
+    """
+    Parse XML file into traff.db database
 
     Keyword arguments:
         path -- path to the XML file
         date -- date of the file
         log -- log handler
     """
-    cwd = os.path.abspath(os.path.dirname(sys.argv[0])) + '/'
+    cwd = os.path.abspath(os.path.dirname(sys.argv[0]))
     inserted_obs = 0
     error_obs = 0
 
     try:
         """Connect DB"""
-        conn_db = sqlite3.connect(cwd + 'data/traff.db')
+        db_path = os.path.join(cwd,'data','traff.db')
+        conn_db = sqlite3.connect(db_path)
         c = conn_db.cursor()
         log.write("..... DB opened.\r\n")
 
@@ -136,21 +137,22 @@ def parseXML(path, date, log):
 if __name__ == '__main__':
 
     """Download remote XML file."""
-    xml_path = 'http://informo.munimadrid.es/informo/tmadrid/pm.xml'
-    remote_file = urllib2.urlopen(xml_path)
+    xml_url = 'http://informo.munimadrid.es/informo/tmadrid/pm.xml'
+    remote_file = urllib2.urlopen(xml_url)
     """Get remote XML last modification date."""
     rf_datetime = datetime.datetime(*remote_file.info().getdate('last-modified')[0:6])
     """Check if already exists a file with the same date (which is written in the filename)."""
     local_file_name = rf_datetime.strftime("%Y%m%d_%H%M")
-    cwd = os.path.abspath(os.path.dirname(sys.argv[0])) + '/'
-    local_file_path = cwd + "data/" + local_file_name + ".xml"
+    cwd = os.path.abspath(os.path.dirname(sys.argv[0]))
+    local_file_path = os.path.join(cwd, 'data', local_file_name + '.xml')
 
     if not os.path.isfile(local_file_path):
         """If no file is found with that filename, download it."""
-        with open(local_file_path, 'w') as local_file:
+        with open(local_file_path,'w') as local_file:
             shutil.copyfileobj(remote_file, local_file)
             """Open log file."""
-            log = open(cwd + 'data/download.log', 'a')
+            log_path = os.path.join(cwd, 'data', 'download.log')
+            log = open(log_path, 'a')
             print("Downloaded file " + local_file_name + ".xml")
             log.write("Downloaded file " + local_file_name + ".xml\r\n")
             local_file.close()
@@ -158,5 +160,7 @@ if __name__ == '__main__':
             log.write("... reading file into database...\r\n")
             """Parse new XML file into database."""
             parseXML(local_file_path, rf_datetime.strftime("%Y-%m-%d %H:%M:%S"), log)
+            #log.write("... removing file " + local_file_name + ".xml\r\n")
+            #os.remove(local_file_path)
             log.write("... FINISHED\r\n")
             log.close()
