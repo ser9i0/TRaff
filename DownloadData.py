@@ -24,7 +24,7 @@ def get_element(element, tag, ret_value):
         return value
 
 
-def parseXML(path, date, log):
+def parse_xml(path, date, logger):
     """
     Parse XML file into traff.db database
 
@@ -39,16 +39,16 @@ def parseXML(path, date, log):
 
     try:
         """Connect DB"""
-        db_path = os.path.join(cwd,'data','traff.db')
+        db_path = os.path.join(cwd, 'data', 'traff.db')
         conn_db = sqlite3.connect(db_path)
         c = conn_db.cursor()
-        log.write("..... DB opened.\r\n")
+        logger.write("..... DB opened.\r\n")
 
         """Parse XML."""
         tree = ET.parse(path)
         t_iter = tree.iter(tag='pm')
         total_obs = len(tree.findall('pm'))
-        log.write("..... XML parsed: " + str(total_obs) + " observations found.\r\n")
+        logger.write("..... XML parsed: " + str(total_obs) + " observations found.\r\n")
 
         """Every element contains the information for one unique access."""
         for elem in t_iter:
@@ -68,10 +68,10 @@ def parseXML(path, date, log):
                 intensidad = get_element(elem, 'intensidad', '-1')
                 ocupacion = get_element(elem, 'ocupacion', '-1')
                 carga = get_element(elem, 'carga', '-1')
-                nivelServicio = get_element(elem, 'nivelServicio', '-1')
-                intensidadSat = get_element(elem, 'intensidadSat', '-1')
+                nivel_servicio = get_element(elem, 'nivelServicio', '-1')
+                intensidad_sat = get_element(elem, 'intensidadSat', '-1')
                 subarea = get_element(elem, 'subarea', '-1')
-                if intensidadSat == '-1' and subarea == '-1':
+                if intensidad_sat == '-1' and subarea == '-1':
                     velocidad = get_element(elem, 'velocidad', '-1')
                 else:
                     velocidad = '-1'
@@ -79,57 +79,62 @@ def parseXML(path, date, log):
                 stm_check_codigo = ("SELECT codigo FROM accesos WHERE codigo = '" + codigo + "';")
                 c.execute(stm_check_codigo)
                 if c.fetchone() is None:
-                    if intensidadSat == '-1':
+                    if intensidad_sat == '-1':
                         stm_insert_access = (
                             "INSERT INTO accesos(codigo,tipo,descripcion,utm_x,utm_y,longitud,latitud) VALUES ('"
                             + codigo + "','INTERURBANO','" + codigo + "',0,0,0,0);")
                     else:
                         stm_insert_access = (
                             "INSERT INTO accesos(codigo,tipo,descripcion,intensidad_sat,subarea,utm_x,utm_y,longitud,latitud) VALUES ('"
-                            + codigo + "','URBANO','" + descripcion + "'," + intensidadSat + "," + subarea + ",0,0,0,0);")
+                            + codigo + "','URBANO','" + descripcion + "'," + intensidad_sat + "," + subarea + ",0,0,0,0);")
                     print(stm_insert_access)
-                    log.write("..... New access added with code " + codigo + ".\r\n")
+                    logger.write("..... New access added with code " + codigo + ".\r\n")
                     c.execute(stm_insert_access)
 
                 if velocidad == '-1':
                     sql_stm = (
                         "INSERT INTO observaciones (codigo,fecha,intensidad,ocupacion,carga,nivel_servicio) VALUES ('"
                         + codigo + "','" + date + "'," + intensidad + "," + ocupacion + "," + carga + "," +
-                        nivelServicio + ");")
+                        nivel_servicio + ");")
                 else:
                     sql_stm = ("INSERT INTO observaciones VALUES ('"
                                + codigo + "','" + date + "'," + intensidad + "," + ocupacion + "," + carga + "," +
-                               nivelServicio + "," + velocidad + ");")
-                #print(sql_stm)
+                               nivel_servicio + "," + velocidad + ");")
+                # print(sql_stm)
                 c.execute(sql_stm)
                 inserted_obs += 1
             else:
                 error_obs += 1
-                #print("Error in " + codigo + " data.")
-                #log.write("..... Error in " + codigo + " data.\r\n")
+                # print("Error in " + codigo + " data.")
+                # logger.write("..... Error in " + codigo + " data.\r\n")
 
         conn_db.commit()
 
     except ET.ParseError as parse_error:
         print("... /!\ ERROR: Error parsing XML file")
-        log.write("... /!\ ERROR: Error parsing XML file\r\n")
+        logger.write("... /!\ ERROR: Error parsing XML file\r\n")
 
     except Exception as e:
         print(
             "... /!\ ERROR: Codigo: " + codigo + ", Intensidad: " + intensidad + ", Ocupacion: " + ocupacion +
-            ", Carga: " + carga + ", nivelServicio: " + nivelServicio)
-        log.write(
+            ", Carga: " + carga + ", nivel_servicio: " + nivel_servicio)
+        logger.write(
             "... /!\ ERROR: Codigo: " + codigo + ", Intensidad: " + intensidad + ", Ocupacion: " + ocupacion +
-            ", Carga: " + carga + ", nivelServicio: " + nivelServicio + "\r\n")
-        #print sql_stm
-        #log.write(sql_stm + "\r\n")
+            ", Carga: " + carga + ", nivel_servicio: " + nivel_servicio + "\r\n")
+        # print sql_stm
+        # logger.write(sql_stm + "\r\n")
         traceback.print_exc()
-        log.write(traceback.print_exc() + "\r\n")
+        logger.write(traceback.print_exc() + "\r\n")
 
     finally:
-        print ("Total observations inserted: {0}/{1} ({2} non valid observations)".format(inserted_obs,total_obs,error_obs))
-        log.write("Total observations inserted: {0}/{1} ({2} non valid observations)\r\n".format(inserted_obs,total_obs,error_obs))
+        print (
+            "Total observations inserted: {0}/{1} ({2} non valid observations)".format(inserted_obs, total_obs,
+                                                                                       error_obs))
+        logger.write(
+            "Total observations inserted: {0}/{1} ({2} non valid observations)\r\n".format(inserted_obs, total_obs,
+                                                                                           error_obs))
         conn_db.close()
+        os.remove(local_file_path)
 
 
 if __name__ == '__main__':
@@ -146,19 +151,17 @@ if __name__ == '__main__':
 
     if not os.path.isfile(local_file_path):
         """If no file is found with that filename, download it."""
-        with open(local_file_path,'w') as local_file:
+        with open(local_file_path, 'w') as local_file:
             shutil.copyfileobj(remote_file, local_file)
             """Open log file."""
-            log_path = os.path.join(cwd, 'data', 'download.log')
-            log = open(log_path, 'a')
+            logger_path = os.path.join(cwd, 'data', 'download.log')
+            logger = open(logger_path, 'a')
             print("Downloaded file {0}.xml".format(local_file_name))
-            log.write("Downloaded file {0}.xml\r\n".format(local_file_name))
+            logger.write("Downloaded file {0}.xml\r\n".format(local_file_name))
             local_file.close()
             print("... reading file into database...")
-            log.write("... reading file into database...\r\n")
+            logger.write("... reading file into database...\r\n")
             """Parse new XML file into database."""
-            parseXML(local_file_path, rf_datetime.strftime("%Y-%m-%d %H:%M:%S"), log)
-            #log.write("... removing file " + local_file_name + ".xml\r\n")
-            #os.remove(local_file_path)
-            log.write("... FINISHED\r\n")
-            log.close()
+            parse_xml(local_file_path, rf_datetime.strftime("%Y-%m-%d %H:%M:%S"), logger)
+            logger.write("... FINISHED\r\n")
+            logger.close()
