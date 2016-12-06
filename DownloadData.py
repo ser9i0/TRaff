@@ -134,7 +134,6 @@ def parse_xml(path, date, logger):
             "Total observations inserted: {0}/{1} ({2} non valid observations)\r\n".format(inserted_obs, total_obs,
                                                                                            error_obs))
         conn_db.close()
-        os.remove(local_file_path)
 
 
 if __name__ == '__main__':
@@ -163,5 +162,7 @@ if __name__ == '__main__':
             logger.write("... reading file into database...\r\n")
             """Parse new XML file into database."""
             parse_xml(local_file_path, rf_datetime.strftime("%Y-%m-%d %H:%M:%S"), logger)
+            """If any exception occurs, we keep XML file for checking the error."""
+            os.remove(local_file_path)
             logger.write("... FINISHED\r\n")
             logger.close()
