@@ -162,7 +162,6 @@ if __name__ == '__main__':
             logger.write("... reading file into database...\r\n")
             """Parse new XML file into database."""
             parse_xml(local_file_path, rf_datetime.strftime("%Y-%m-%d %H:%M:%S"), logger)
-            """If any exception occurs, we keep XML file for checking the error."""
-            os.remove(local_file_path)
+            # os.remove(local_file_path)
             logger.write("... FINISHED\r\n")
             logger.close()
